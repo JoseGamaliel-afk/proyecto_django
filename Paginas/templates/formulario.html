@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guardar datos</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+
+<h1>Guardar datos</h1>
+
+<form method="POST" action="{% url 'guardar' %}">
+    {% csrf_token %}
+
+    <input type="hidden" name="nombre" value="Producto 1">
+    <input type="hidden" name="descripcion" value="si">
+
+    <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
+
+    <br><br>
+    <button type="submit">Guardar</button>
+</form>
+
+</body>
+</html>
