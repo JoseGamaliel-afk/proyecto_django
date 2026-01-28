@@ -1,93 +1,193 @@
-/* Reset y Base */
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-dark: #1e293b;
+    --text-light: #64748b;
+    --error: #ef4444;
+    --success: #10b981;
+    --border: #e2e8f0;
+}
+
 body {
     margin: 0;
-    padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f3f4f6; /* El gris claro del Home */
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-dark);
 }
 
-/* Encabezado Oscuro (Igual al Home) */
+/* Header con gradiente y curva */
 header {
-    background: #0f172a; /* El color azul muy oscuro */
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: white;
-    padding: 40px 20px;
+    padding: 80px 20px;
     text-align: center;
+    clip-path: ellipse(150% 100% at 50% 0%);
 }
 
-header h1 {
-    margin: 0;
-    font-size: 2.2rem;
-}
+header h1 { margin: 0; font-size: 2.5rem; letter-spacing: -1px; }
+header p { opacity: 0.8; font-size: 1.1rem; margin-top: 10px; }
 
-header p {
-    margin-top: 10px;
-    opacity: 0.9;
-}
-
-/* Contenedor del contenido */
 main {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 20px;
+    max-width: 800px;
+    margin: -50px auto 50px;
+    padding: 0 20px;
 }
 
-/* Breadcrumbs (Home > Formulario) */
+/* Breadcrumbs */
 .breadcrumbs {
     margin-bottom: 20px;
-    font-size: 14px;
-    color: #4f46e5;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
-.breadcrumbs a {
-    color: #4f46e5;
-    text-decoration: none;
-}
+.breadcrumbs a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.breadcrumbs .sep { color: var(--text-light); }
+.breadcrumbs .current { color: var(--text-light); }
 
-/* La caja blanca del formulario */
+/* Caja del Formulario */
 .box {
-    background: white;
-    border-radius: 12px;
+    background: var(--card-bg);
     padding: 40px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -6px rgba(0,0,0,0.04);
 }
 
-/* Inputs y diseño del formulario */
-form input, form textarea {
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 5px;
-    border-radius: 10px;
-    border: 1px solid #d1d5db;
-    font-size: 15px;
+/* Grupos del formulario */
+.form-group {
+    margin-bottom: 24px;
 }
 
-small {
+label {
     display: block;
-    margin-bottom: 15px;
-    color: #6b7280;
-    text-align: left;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
 }
 
-/* Botón de Guardar */
+input, textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f1f5f9;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+input.invalid {
+    border-color: var(--error);
+}
+
+/* Errores y Contadores */
+.field-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.field-error {
+    color: var(--error);
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.contador {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* Alertas Django */
+.alert {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+    animation: slideIn 0.4s ease-out;
+}
+.alert.success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+.alert.error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+
+/* reCAPTCHA */
+.g-recaptcha-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+/* Botón */
 button {
     width: 100%;
     padding: 16px;
-    border-radius: 10px;
-    border: none;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    background: #4f46e5; /* El morado/azul de tu botón actual */
+    background: var(--primary);
     color: white;
-    transition: background 0.2s;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background: #4338ca;
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
 }
 
-/* Centrar reCAPTCHA */
-.g-recaptcha {
+/* Sección de Registros */
+.registros-section {
+    margin-top: 60px;
+}
+
+.grid-registros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.card-registro {
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
     display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+}
+
+.card-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.card-info { display: flex; flex-direction: column; }
+.card-info strong { font-size: 1rem; }
+.card-info span { font-size: 0.85rem; color: var(--text-light); }
+
+@keyframes slideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
