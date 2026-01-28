@@ -1,21 +1,56 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/home.css' %}">
 <!DOCTYPE html>
-<html>
+<html lang="es">
+
 <head>
-    <title>Inicio</title>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+    <link rel="stylesheet" href="{% static 'styles/home.css' %}">
+
+
 </head>
+
 <body>
 
-<h1>Hola mundo</h1>
+    <header>
+        <h1>Home</h1>
+        <p>Página principal del proyecto</p>
+    </header>
 
-<a href="{% url 'formulario' %}">
-    <button>Ir al formulario</button>
+    <main>
+        <section class="box">
+            <h2>Explorar funcionalidades</h2>
+
+            <div class="menu">
+                <a href="{% url 'calculadora' %}">
+                    <button>Calculadora</button>
+                </a>
+
+                <a href="{% url 'formulario' %}">
+                    <button>Formulario</button>
+                </a>
+
+                <a href="{% url 'imagenes' %}">
+                    <button>imagenes</button>
+                </a>
+
+                <a href="{% url 'hola' %}">
+                    <button>Hola Mundo</button>
+                </a>
+
+                
+
+                <a href="/dvsd/">
+    <button>Mostrar pantalla de error</button>
 </a>
+1
 
-<br><br>
-
-<a href="{% url 'redireccionamiento' %}">
-    <button>Ir a página de aviso</button>
-</a>
+            </div>
+        </section>
+    </main>
 
 </body>
+
 </html>

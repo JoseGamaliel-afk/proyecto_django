@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Galería</title>
+    <link rel="stylesheet" href="{% static 'styles/imagenes.css' %}">
+</head>
+<body>
+
+<header>
+    <h1>Galería</h1>
+    <p>Apartado para imágenes</p>
+</header>
+
+<main>
+    <div class="page-container">
+        <nav class="breadcrumbs">
+            <a href="{% url 'home' %}">Home</a>
+            <span>›</span>
+            <span>Imágenes</span>
+        </nav>
+    </div>
+
+    <div class="box subir-imagen-card">
+        <h2>Subir imagen</h2>
+
+        {% if messages %}
+    {% for message in messages %}
+        <div class="mensaje">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" name="titulo" placeholder="Título" required>
+            <input type="file" name="imagen" required>
+            <button type="submit">Subir Imagen</button>
+        </form>
+    </div>
+
+    <h2 class="section-title">Carrusel</h2>
+    <div class="carrusel">
+        {% for img in imagenes %}
+            <img src="{{ img.imagen_url }}" class="slide" style="width:100%; height:400px; object-fit:cover; display:none;">
+        {% endfor %}
+    </div>
+
+    <h2 class="section-title">Galería 3x3</h2>
+    <div class="galeria">
+        {% for img in imagenes %}
+            <div class="card">
+                <img src="{{ img.imagen_url }}" alt="{{ img.titulo }}">
+                <div style="padding: 15px;">
+                    <p style="margin:0; font-weight:bold;">{{ img.titulo }}</p>
+                    <a href="{% url 'eliminar_imagen' img.id %}" class="btn-eliminar">🗑 Eliminar</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</main>
+
+<script>
+let index = 0;
+const slides = document.querySelectorAll(".slide");
+
+function mostrar() {
+    slides.forEach(s => s.style.display = "none");
+    if(slides.length){
+        slides[index].style.display = "block";
+        index = (index + 1) % slides.length;
+    }
+}
+
+if(slides.length > 0) {
+    mostrar();
+    setInterval(mostrar, 3000);
+}
+</script>
+
+</body>
+</html>

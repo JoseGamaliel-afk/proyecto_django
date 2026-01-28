@@ -1,24 +1,83 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Guardar datos</title>
+    <meta charset="UTF-8">
+    <title>Formulario</title>
+    <link rel="stylesheet" href="{% static 'styles/formulario.css' %}">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
-<h1>Guardar datos</h1>
+    <header>
+        <h1>Formulario de Registro</h1>
+        <p>Completa tus datos a continuación</p>
+    </header>
 
-<form method="POST" action="{% url 'guardar' %}">
-    {% csrf_token %}
+    <main>
+        <div class="page-container">
+            <nav class="breadcrumbs">
+                <a href="{% url 'home' %}" style="color: #6366f1; text-decoration: none;">Home</a>
+                <span>›</span>
+                <span>Formulario</span>
+            </nav>
+        </div>
 
-    <input type="hidden" name="nombre" value="Producto 1">
-    <input type="hidden" name="descripcion" value="si">
+        {% if mensaje %}
+        <div class="alert {{ tipo }}">
+            {{ mensaje }}
+        </div>
+        {% endif %}
 
-    <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
+        <section class="box">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="nombre" id="nombre" placeholder="Nombre" required minlength="3" maxlength="50">
+                <small id="nombre-contador">0 / 50</small>
 
-    <br><br>
-    <button type="submit">Guardar</button>
-</form>
+                <input type="email" name="email" placeholder="Email" required maxlength="254">
 
+                <input type="text" name="telefono" placeholder="Teléfono" pattern="[0-9]{7,15}" title="Solo números (7 a 15 dígitos)" maxlength="15">
+
+                <input type="date" name="fecha_nacimiento">
+
+                <textarea name="descripcion" id="descripcion" placeholder="Descripción" maxlength="500"></textarea>
+                <small id="descripcion-contador">0 / 500</small>
+
+                <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
+
+                <button type="submit">Guardar</button>
+            </form>
+        </section>
+
+        <hr>
+
+        <h2>Registros guardados</h2>
+        {% if registros %}
+        <ul>
+            {% for r in registros %}
+                <li>
+                    <strong>{{ r.nombre }}</strong> | {{ r.email }} | {{ r.telefono }} | {{ r.fecha_nacimiento }}
+                </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="text-align: center;">No hay registros aún</p>
+        {% endif %}
+    </main>
+
+    <script>
+    function contador(inputId, contadorId, max) {
+        const input = document.getElementById(inputId);
+        const contador = document.getElementById(contadorId);
+        input.addEventListener("input", () => {
+            const usados = input.value.length;
+            contador.textContent = `${usados} / ${max}`;
+            contador.style.color = usados >= max ? "red" : "gray";
+        });
+    }
+    contador("nombre", "nombre-contador", 50);
+    contador("descripcion", "descripcion-contador", 500);
+    </script>
 </body>
 </html>

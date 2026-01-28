@@ -1,0 +1,11 @@
+<nav class="breadcrumbs"> <a href="{% url 'home' %}">Home</a>
+
+    {% for crumb in breadcrumbs %}
+        <span>›</span>
+        {% if crumb.url %}
+            <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+        {% else %}
+            <span>{{ crumb.label }}</span>
+        {% endif %}
+    {% endfor %}
+</nav>

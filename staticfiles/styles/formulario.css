@@ -1,0 +1,97 @@
+/* Importamos la base del Home */
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f4f6;
+    color: #020617;
+}
+
+/* Encabezado idéntico al Home */
+header {
+    background: #0f172a;
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+/* Contenedor principal */
+main {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* Estilo de caja igual al Home */
+.box {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Ajustes del Formulario interno */
+form {
+    width: 100%;
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 10px; /* Reducido para dar espacio a los <small> */
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+}
+
+small {
+    display: block;
+    margin-bottom: 15px;
+    text-align: right;
+}
+
+/* Botón con el color del hover del Home o azul principal */
+button {
+    width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    background: #0f172a; /* Color oscuro del header para coherencia */
+    color: white;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #1e293b;
+}
+
+/* Estilo de los registros guardados */
+ul {
+    padding: 0;
+    list-style: none;
+}
+
+li {
+    background: white;
+    margin-bottom: 12px;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+hr {
+    margin: 40px 0;
+    border: none;
+    border-top: 1px solid #d1d5db;
+}

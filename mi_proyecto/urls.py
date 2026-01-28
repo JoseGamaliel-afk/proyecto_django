@@ -6,8 +6,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('formulario/', views.formulario, name='formulario'),
-    path('guardar/', views.guardar, name='guardar'),
-   path('redireccionamiento/', views.redireccionamiento, name='redireccionamiento'),
+    path('redireccionamiento/', views.redireccionamiento, name='redireccionamiento'),
+    path('calculadora/', views.calculadora, name='calculadora'),
+    path("imagenes/", views.imagenes, name="imagenes"),
+    path("imagenes/eliminar/<int:id>/", views.eliminar_imagen, name="eliminar_imagen"),
+    path('error/', views.provocar_error),
+    path('hola/', views.hola, name='hola'),
 
 ]
 

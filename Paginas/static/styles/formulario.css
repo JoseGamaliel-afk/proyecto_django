@@ -1,0 +1,93 @@
+/* Reset y Base */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f4f6; /* El gris claro del Home */
+}
+
+/* Encabezado Oscuro (Igual al Home) */
+header {
+    background: #0f172a; /* El color azul muy oscuro */
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.2rem;
+}
+
+header p {
+    margin-top: 10px;
+    opacity: 0.9;
+}
+
+/* Contenedor del contenido */
+main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Breadcrumbs (Home > Formulario) */
+.breadcrumbs {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #4f46e5;
+}
+.breadcrumbs a {
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+/* La caja blanca del formulario */
+.box {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Inputs y diseño del formulario */
+form input, form textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+}
+
+small {
+    display: block;
+    margin-bottom: 15px;
+    color: #6b7280;
+    text-align: left;
+}
+
+/* Botón de Guardar */
+button {
+    width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #4f46e5; /* El morado/azul de tu botón actual */
+    color: white;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #4338ca;
+}
+
+/* Centrar reCAPTCHA */
+.g-recaptcha {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
