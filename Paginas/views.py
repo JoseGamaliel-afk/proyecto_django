@@ -154,7 +154,29 @@ def imagenes(request):
     if request.method == "POST" and request.FILES.get("imagen"):
         archivo = request.FILES["imagen"]
 
-        resultado = cloudinary.uploader.upload(archivo, folder="galeria")
+        # -------- VALIDAR QUE SEA IMAGEN --------
+        tipos_permitidos = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+        extensiones_permitidas = [".jpg", ".jpeg", ".png", ".webp", ".gif"]
+
+        if archivo.content_type not in tipos_permitidos:
+            messages.error(request, "❌ El archivo debe ser una imagen válida")
+            return redirect("imagenes")
+
+        if not archivo.name.lower().endswith(tuple(extensiones_permitidas)):
+            messages.error(request, "❌ Extensión de imagen no permitida")
+            return redirect("imagenes")
+
+        # (opcional) tamaño máximo: 5MB
+        if archivo.size > 5 * 1024 * 1024:
+            messages.error(request, "❌ La imagen no puede pesar más de 5MB")
+            return redirect("imagenes")
+
+        # -------- SUBIR A CLOUDINARY --------
+        resultado = cloudinary.uploader.upload(
+            archivo,
+            folder="galeria",
+            resource_type="image"
+        )
 
         Imagen.objects.create(
             titulo=request.POST.get("titulo", "Sin título"),
@@ -174,7 +196,6 @@ def imagenes(request):
         "breadcrumbs": [{"label": "Galería", "url": None}],
         "faltantes": faltantes
     })
-
 
 # ==================== ELIMINAR IMAGEN ====================
 

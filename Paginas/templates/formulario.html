@@ -17,13 +17,13 @@
 <main>
     <div class="page-container">
         <nav class="breadcrumbs">
-            <a href="{% url 'home' %}" style="color: #6366f1; text-decoration: none;">Home</a>
+            <a href="{% url 'home' %}" style="color:#6366f1;text-decoration:none;">Home</a>
             <span>›</span>
             <span>Formulario</span>
         </nav>
     </div>
 
-    {# 🔔 MENSAJES BACKEND (Django) #}
+    {# 🔔 MENSAJES BACKEND (Django ya escapa HTML) #}
     {% if messages %}
         {% for message in messages %}
             <div class="alert {{ message.tags }}">
@@ -32,77 +32,76 @@
         {% endfor %}
     {% endif %}
 
-    {# ⚡ ALERTAS EN TIEMPO REAL #}
+    {# ⚡ ALERTAS FRONTEND SEGURAS #}
     <div id="alertas"></div>
 
     <section class="box">
-    <form method="POST" action="{% url 'formulario' %}">
-        {% csrf_token %}
+        <form method="POST" action="{% url 'formulario' %}">
+            {% csrf_token %}
 
-        <div class="form-group">
-            <input
-                type="text"
-                name="nombre"
-                id="nombre"
-                placeholder="Nombre"
-                required
-                minlength="3"
-                maxlength="50"
-                value="{{ request.POST.nombre }}"
-            >
-            <small class="contador" id="nombre-contador">0 / 50</small>
-        </div>
+            <div class="form-group">
+                <input
+                    type="text"
+                    name="nombre"
+                    id="nombre"
+                    placeholder="Nombre"
+                    required
+                    minlength="3"
+                    maxlength="50"
+                    value="{{ request.POST.nombre }}"
+                >
+                <small class="contador" id="nombre-contador">0 / 50</small>
+            </div>
 
-        <div class="form-group">
-            <input
-                type="email"
-                name="email"
-                id="email"
-                placeholder="Email"
-                required
-                maxlength="254"
-                value="{{ request.POST.email }}"
-            >
-        </div>
+            <div class="form-group">
+                <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    placeholder="Email"
+                    required
+                    maxlength="254"
+                    value="{{ request.POST.email }}"
+                >
+            </div>
 
-        <div class="form-group">
-            <input
-                type="text"
-                name="telefono"
-                id="telefono"
-                placeholder="Teléfono"
-                pattern="[0-9]{7,15}"
-                maxlength="15"
-                value="{{ request.POST.telefono }}"
-            >
-        </div>
+            <div class="form-group">
+                <input
+                    type="text"
+                    name="telefono"
+                    id="telefono"
+                    placeholder="Teléfono"
+                    pattern="[0-9]{7,15}"
+                    maxlength="15"
+                    value="{{ request.POST.telefono }}"
+                >
+            </div>
 
-        <div class="form-group">
-            <input
-                type="date"
-                name="fecha_nacimiento"
-                value="{{ request.POST.fecha_nacimiento }}"
-            >
-        </div>
+            <div class="form-group">
+                <input
+                    type="date"
+                    name="fecha_nacimiento"
+                    value="{{ request.POST.fecha_nacimiento }}"
+                >
+            </div>
 
-        <div class="form-group">
-            <textarea
-                name="descripcion"
-                id="descripcion"
-                placeholder="Descripción"
-                maxlength="500"
-            >{{ request.POST.descripcion }}</textarea>
-            <small class="contador" id="descripcion-contador">0 / 500</small>
-        </div>
+            <div class="form-group">
+                <textarea
+                    name="descripcion"
+                    id="descripcion"
+                    placeholder="Descripción"
+                    maxlength="500"
+                >{{ request.POST.descripcion }}</textarea>
+                <small class="contador" id="descripcion-contador">0 / 500</small>
+            </div>
 
-        <div class="g-recaptcha-wrapper">
-            <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
-        </div>
+            <div class="g-recaptcha-wrapper">
+                <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
+            </div>
 
-        <button type="submit">Guardar</button>
-    </form>
-</section>
-
+            <button type="submit">Guardar</button>
+        </form>
+    </section>
 
     <hr>
 
@@ -120,21 +119,23 @@
             {% endfor %}
         </ul>
     {% else %}
-        <p style="text-align: center;">No hay registros aún</p>
+        <p style="text-align:center;">No hay registros aún</p>
     {% endif %}
 </main>
 
 <script>
-/* ================= ALERTAS EN TIEMPO REAL ================= */
+/* ================= ALERTAS SEGURAS ================= */
 
 const alertas = document.getElementById("alertas");
 
 function mostrarAlerta(mensaje) {
-    alertas.innerHTML = `
-        <div class="alert error">
-            ${mensaje}
-        </div>
-    `;
+    alertas.innerHTML = "";
+
+    const div = document.createElement("div");
+    div.className = "alert error";
+    div.textContent = mensaje; // 🔐 NO ejecuta HTML
+
+    alertas.appendChild(div);
 }
 
 function limpiarAlerta() {
