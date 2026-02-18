@@ -189,7 +189,7 @@ email.addEventListener("input", () => {
 
 telefono.addEventListener("input", () => {
     if (telefono.value && !/^\d{7,15}$/.test(telefono.value)) {
-        mostrarAlerta("❌ Teléfono inválido (7 a 15 dígitos)");
+        mostrarAlerta(" Teléfono inválido (7 a 15 dígitos)");
     } else {
         limpiarAlerta();
     }

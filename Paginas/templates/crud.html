@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Directorio Pro - Django CRUD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'styles/crud.css' %}">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+</head>
+<body>
+
+<div id="alertas"></div>
+
+<header>
+    <div class="header-content">
+        <div class="header-text">
+            <h1><i class="fas fa-address-book"></i> Directorio de Contactos</h1>
+            <p>Panel de administración de registros en tiempo real</p>
+        </div>
+        <button class="btn btn-primary" onclick="abrirModal()">
+            <i class="fas fa-plus-circle"></i> Nuevo Contacto
+        </button>
+    </div>
+</header>
+
+<main>
+    <div class="page-container">
+        <nav class="breadcrumbs">
+            <a href="{% url 'home' %}" style="color:#6366f1;text-decoration:none;">Home</a>
+            <span>›</span>
+            <span>Crud</span>
+        </nav>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Descripción</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lista">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div class="modal" id="modalForm">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 id="modalTitle" style="font-size: 1.4rem; color: var(--primary);">Nuevo Registro</h2>
+            <i class="fas fa-times" onclick="cerrarModal()" style="cursor:pointer; color: var(--text-muted);"></i>
+        </div>
+
+        <form id="form-crud">
+            <input type="hidden" id="id">
+            
+            <div class="form-group full-width">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" required placeholder="Ej. Juan Pérez">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" placeholder="correo@ejemplo.com">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" placeholder="Ej. 555-0123">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="descripcion">Notas / Descripción</label>
+                <textarea id="descripcion" rows="3" placeholder="Información adicional..."></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="fecha_nacimiento">Fecha de Nacimiento</label>
+                <input type="date" id="fecha_nacimiento">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btn-submit">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById("modalForm");
+    const form = document.getElementById("form-crud");
+    const lista = document.getElementById("lista");
+    const idInput = document.getElementById("id");
+    const modalTitle = document.getElementById("modalTitle");
+
+    let registrosCache = [];
+
+    /* --- FUNCIONES UI --- */
+    function abrirModal(editMode = false) {
+        modalTitle.textContent = editMode ? "Actualizar Contacto" : "Nuevo Registro";
+        modal.classList.add("active");
+    }
+
+    function cerrarModal() {
+        modal.classList.remove("active");
+        form.reset();
+        idInput.value = "";
+    }
+
+    window.onclick = (e) => { if(e.target == modal) cerrarModal(); }
+
+    /* --- LOGICA FETCH --- */
+
+    async function cargarRegistros() {
+        try {
+            const res = await fetch("/api/registros/"); 
+            const data = await res.json();
+            registrosCache = data;
+            
+            lista.innerHTML = data.map(r => `
+                <tr>
+                    <td><div style="font-weight: 600; color: var(--primary);">${r.nombre}</div></td>
+                    <td>${r.email || '<span style="color:#cbd5e1">-</span>'}</td>
+                    <td>${r.telefono || '-'}</td>
+                    <td><div class="desc-cell">${r.descripcion || ''}</div></td>
+                    <td>
+                        <div style="display: flex; justify-content: center; gap: 5px;">
+                            <button class="btn-icon edit" onclick="prepararEdicion(${r.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" onclick="eliminarRegistro(${r.id})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            mostrarAlerta("Error al cargar datos", "error");
+        }
+    }
+
+    function prepararEdicion(id) {
+        const registro = registrosCache.find(r => r.id == id);
+        if(registro) {
+            idInput.value = registro.id;
+            document.getElementById("nombre").value = registro.nombre;
+            document.getElementById("email").value = registro.email || "";
+            document.getElementById("telefono").value = registro.telefono || "";
+            document.getElementById("descripcion").value = registro.descripcion || "";
+            document.getElementById("fecha_nacimiento").value = registro.fecha_nacimiento || "";
+            abrirModal(true);
+        }
+    }
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = {
+            nombre: document.getElementById("nombre").value.trim(),
+            email: document.getElementById("email").value.trim() || null,
+            telefono: document.getElementById("telefono").value.trim() || null,
+            descripcion: document.getElementById("descripcion").value.trim(),
+            fecha_nacimiento: document.getElementById("fecha_nacimiento").value || null
+        };
+
+        const id = idInput.value;
+        const url = id ? `/api/editar/${id}/` : "/api/crear/";
+        const method = id ? "PUT" : "POST";
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if(res.ok) {
+                mostrarAlerta(result.mensaje || "Éxito", "success");
+                cerrarModal();
+                cargarRegistros();
+            } else {
+                mostrarAlerta(result.error || "Error en el proceso", "error");
+            }
+        } catch (error) {
+            mostrarAlerta("Error de conexión", "error");
+        }
+    };
+
+    async function eliminarRegistro(id) {
+        if(confirm("¿Deseas eliminar este registro permanentemente?")) {
+            try {
+                const res = await fetch(`/api/eliminar/${id}/`, { method: "DELETE" });
+                if(res.ok) {
+                    mostrarAlerta("Registro eliminado", "success");
+                    cargarRegistros();
+                }
+            } catch (error) {
+                mostrarAlerta("No se pudo eliminar", "error");
+            }
+        }
+    }
+
+    function mostrarAlerta(msg, tipo) {
+        const alertasDiv = document.getElementById("alertas");
+        const alerta = document.createElement("div");
+        alerta.className = `alert ${tipo}`;
+        alerta.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        alertasDiv.appendChild(alerta);
+        setTimeout(() => {
+            alerta.style.opacity = "0";
+            setTimeout(() => alerta.remove(), 500);
+        }, 3000);
+    }
+
+    cargarRegistros();
+</script>
+
+</body>
+</html>

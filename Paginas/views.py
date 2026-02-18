@@ -10,6 +10,11 @@ import cloudinary.uploader
 
 from .models import Registro, Imagen
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+
 
 # ==================== HOME ====================
 
@@ -236,4 +241,101 @@ def hola(request):
             {"label": "Hola", "url": None}
         ]
     })
+# ==================== CRUD CON FETCH API ====================
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, render
+from .models import Registro
+import json
+
+
+# ---------- Vista que carga la página ----------
+def crud(request):
+    return render(request, "crud.html")
+
+
+# ---------- READ ----------
+def api_registros(request):
+    if request.method != "GET":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    registros = Registro.objects.all().order_by("-fecha_creacion")
+
+    data = list(registros.values(
+        "id",
+        "nombre",
+        "email",
+        "telefono",
+        "descripcion",
+        "fecha_nacimiento",
+        "fecha_creacion"
+    ))
+
+    return JsonResponse(data, safe=False)
+
+
+# ---------- CREATE ----------
+@csrf_exempt
+def api_crear(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+
+        registro = Registro.objects.create(
+            nombre=data.get("nombre", "").strip(),
+            email=data.get("email") or None,
+            telefono=data.get("telefono") or None,
+            descripcion=data.get("descripcion", "").strip(),
+            fecha_nacimiento=data.get("fecha_nacimiento") or None
+        )
+
+        return JsonResponse(
+            {"mensaje": "Creado correctamente", "id": registro.id},
+            status=201
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+# ---------- UPDATE ----------
+@csrf_exempt
+def api_editar(request, id):
+    if request.method != "PUT":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        registro = get_object_or_404(Registro, id=id)
+
+        registro.nombre = data.get("nombre", registro.nombre)
+        registro.email = data.get("email", registro.email)
+        registro.telefono = data.get("telefono", registro.telefono)
+        registro.descripcion = data.get("descripcion", registro.descripcion)
+        registro.fecha_nacimiento = data.get(
+            "fecha_nacimiento",
+            registro.fecha_nacimiento
+        )
+
+        registro.save()
+
+        return JsonResponse({"mensaje": "Actualizado correctamente"})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+# ---------- DELETE ----------
+@csrf_exempt
+def api_eliminar(request, id):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    registro = get_object_or_404(Registro, id=id)
+    registro.delete()
+
+    return JsonResponse({"mensaje": "Eliminado correctamente"})
 

@@ -13,6 +13,13 @@ urlpatterns = [
     path('error/', views.provocar_error),
     path('hola/', views.hola, name='hola'),
 
+    path("crud/", views.crud, name="crud"),
+
+    path("api/registros/", views.api_registros),
+    path("api/crear/", views.api_crear),
+    path("api/editar/<int:id>/", views.api_editar),
+    path("api/eliminar/<int:id>/", views.api_eliminar),
+
 ]
 
 from django.conf.urls import handler404, handler500

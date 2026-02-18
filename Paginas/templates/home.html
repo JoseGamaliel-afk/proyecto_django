@@ -1,56 +1,60 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'styles/home.css' %}">
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-
+    {% load static %}
     <link rel="stylesheet" href="{% static 'styles/home.css' %}">
+    <!DOCTYPE html>
+    <html lang="es">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Home</title>
+
+        <link rel="stylesheet" href="{% static 'styles/home.css' %}">
 
 
-</head>
+    </head>
 
-<body>
+    <body>
 
-    <header>
-        <h1>Home</h1>
-        <p>Página principal del proyecto</p>
-    </header>
+        <header>
+            <h1>Home</h1>
+            <p>Página principal del proyecto</p>
+        </header>
 
-    <main>
-        <section class="box">
-            <h2>Explorar funcionalidades</h2>
+        <main>
+            <section class="box">
+                <h2>Explorar funcionalidades</h2>
 
-            <div class="menu">
-                <a href="{% url 'calculadora' %}">
-                    <button>Calculadora</button>
-                </a>
+                <div class="menu">
+                    <a href="{% url 'calculadora' %}">
+                        <button>Calculadora</button>
+                    </a>
 
-                <a href="{% url 'formulario' %}">
-                    <button>Formulario</button>
-                </a>
+                    <a href="{% url 'formulario' %}">
+                        <button>Formulario</button>
+                    </a>
 
-                <a href="{% url 'imagenes' %}">
-                    <button>imagenes</button>
-                </a>
+                    <a href="{% url 'imagenes' %}">
+                        <button>imagenes</button>
+                    </a>
 
-                <a href="{% url 'hola' %}">
-                    <button>Hola Mundo</button>
-                </a>
+                    <a href="{% url 'hola' %}">
+                        <button>Hola Mundo</button>
+                    </a>
 
-                
+                    <a href="{% url 'crud' %}">
+                        <button>crud</button>
+                    </a>
 
-                <a href="/dvsd/">
-    <button>Mostrar pantalla de error</button>
-</a>
-1
+                    
 
-            </div>
-        </section>
-    </main>
+                    <a href="/dvsd/">
+        <button>Mostrar pantalla de error</button>
+    </a>
+    1
 
-</body>
+                </div>
+            </section>
+        </main>
 
-</html>
+    </body>
+
+    </html>
