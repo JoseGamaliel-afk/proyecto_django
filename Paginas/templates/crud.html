@@ -3,12 +3,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Directorio Pro - Django CRUD</title>
+    <title>Django CRUD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'styles/crud.css' %}">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    
+    <style>
+        /* Estilos de búsqueda y ordenamiento */
+        .search-container { 
+            margin: 20px 0; 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 10px; 
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            align-items: center;
+        }
+        .search-input-wrapper {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            position: relative;
+            min-width: 250px;
+        }
+        .search-input { 
+            width: 100%; padding: 12px 18px 12px 40px; border: 2px solid #e2e8f0; border-radius: 10px;
+            outline: none; transition: all 0.3s; font-size: 1rem;
+        }
+        .search-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        .search-icon { position: absolute; left: 15px; color: #94a3b8; }
+
+        .filter-select {
+            flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+            background: white; outline: none; cursor: pointer; min-width: 180px;
+        }
+        .btn-clear {
+            padding: 12px 20px; background: #f1f5f9; border: none; border-radius: 10px;
+            color: #475569; cursor: pointer; transition: 0.3s; font-weight: 500;
+        }
+        .btn-clear:hover { background: #e2e8f0; color: #1e293b; }
+        
+        /* Paginación << < 1 2 > >> */
+        .pagination { 
+            display: flex; justify-content: center; align-items: center; 
+            gap: 5px; margin-top: 25px; padding: 20px 0;
+        }
+        .page-btn {
+            min-width: 38px; height: 38px; border: 1px solid #e2e8f0; background: white;
+            color: #475569; cursor: pointer; border-radius: 8px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; font-weight: 600;
+        }
+        .page-btn:hover:not(:disabled) { border-color: #6366f1; color: #6366f1; background: #f8fafc; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .active-page { background: #6366f1 !important; color: white !important; border-color: #6366f1 !important; }
+
+        #lista tr:hover { background-color: #f8fafc; }
+        .date-badge { font-size: 0.85rem; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; }
+    </style>
 </head>
 <body>
 
@@ -17,8 +69,8 @@
 <header>
     <div class="header-content">
         <div class="header-text">
-            <h1><i class="fas fa-address-book"></i> Directorio de Contactos</h1>
-            <p>Panel de administración de registros en tiempo real</p>
+            <h1><i class="fas fa-address-book"></i> Crud</h1>
+            <p>Búsqueda y administración en tiempo real</p>
         </div>
         <button class="btn btn-primary" onclick="abrirModal()">
             <i class="fas fa-plus-circle"></i> Nuevo Contacto
@@ -31,202 +83,145 @@
         <nav class="breadcrumbs">
             <a href="{% url 'home' %}" style="color:#6366f1;text-decoration:none;">Home</a>
             <span>›</span>
-            <span>Crud</span>
+            <span>crud</span>
         </nav>
-    </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Descripción</th>
-                        <th style="text-align: center;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="lista">
-                    </tbody>
-            </table>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="busqueda" class="search-input" 
+                       placeholder="Buscar por nombre, email o teléfono..." 
+                       onkeyup="filtrarYOrdenar()">
+            </div>
+
+            <select id="ordenarPor" class="filter-select" onchange="filtrarYOrdenar()">
+                <option value="nombre_asc">🔤 Nombre (A-Z)</option>
+                <option value="nombre_desc">🔤 Nombre (Z-A)</option>
+                <option value="fecha_asc">📅 Fecha (Más antiguos)</option>
+                <option value="fecha_desc">📅 Fecha (Más recientes)</option>
+            </select>
+
+            <button class="btn-clear" onclick="limpiarFiltros()">
+                <i class="fas fa-eraser"></i> Limpiar
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Nacimiento</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista"></tbody>
+                </table>
+            </div>
+            <div id="pagination" class="pagination"></div>
         </div>
     </div>
 </main>
 
-<div class="modal" id="modalForm">
-    <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 id="modalTitle" style="font-size: 1.4rem; color: var(--primary);">Nuevo Registro</h2>
-            <i class="fas fa-times" onclick="cerrarModal()" style="cursor:pointer; color: var(--text-muted);"></i>
-        </div>
-
-        <form id="form-crud">
-            <input type="hidden" id="id">
-            
-            <div class="form-group full-width">
-                <label for="nombre">Nombre Completo</label>
-                <input type="text" id="nombre" required placeholder="Ej. Juan Pérez">
-            </div>
-
-            <div class="form-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" placeholder="correo@ejemplo.com">
-            </div>
-
-            <div class="form-group">
-                <label for="telefono">Teléfono</label>
-                <input type="text" id="telefono" placeholder="Ej. 555-0123">
-            </div>
-
-            <div class="form-group full-width">
-                <label for="descripcion">Notas / Descripción</label>
-                <textarea id="descripcion" rows="3" placeholder="Información adicional..."></textarea>
-            </div>
-
-            <div class="form-group full-width">
-                <label for="fecha_nacimiento">Fecha de Nacimiento</label>
-                <input type="date" id="fecha_nacimiento">
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary" id="btn-submit">
-                    <i class="fas fa-save"></i> Guardar Cambios
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
-    const modal = document.getElementById("modalForm");
-    const form = document.getElementById("form-crud");
-    const lista = document.getElementById("lista");
-    const idInput = document.getElementById("id");
-    const modalTitle = document.getElementById("modalTitle");
-
-    let registrosCache = [];
-
-    /* --- FUNCIONES UI --- */
-    function abrirModal(editMode = false) {
-        modalTitle.textContent = editMode ? "Actualizar Contacto" : "Nuevo Registro";
-        modal.classList.add("active");
-    }
-
-    function cerrarModal() {
-        modal.classList.remove("active");
-        form.reset();
-        idInput.value = "";
-    }
-
-    window.onclick = (e) => { if(e.target == modal) cerrarModal(); }
-
-    /* --- LOGICA FETCH --- */
+    let registrosCache = [];      
+    let registrosFiltrados = [];  
+    let paginaActual = 1;
+    const registrosPorPagina = 5; 
 
     async function cargarRegistros() {
         try {
             const res = await fetch("/api/registros/"); 
-            const data = await res.json();
-            registrosCache = data;
+            registrosCache = await res.json();
+            filtrarYOrdenar(false); 
+        } catch (e) { console.error("Error cargando datos"); }
+    }
+
+    function filtrarYOrdenar(resetPagina = true) {
+        const termino = document.getElementById("busqueda").value.toLowerCase().trim();
+        const orden = document.getElementById("ordenarPor").value;
+        
+        // 1. Filtrado Global (Busca en todos los campos relevantes)
+        let resultado = registrosCache.filter(r => {
+            return (r.nombre || "").toLowerCase().includes(termino) ||
+                   (r.email || "").toLowerCase().includes(termino) ||
+                   (r.telefono || "").toLowerCase().includes(termino);
+        });
+
+        // 2. Ordenamiento
+        resultado.sort((a, b) => {
+            if (orden === "nombre_asc") return a.nombre.localeCompare(b.nombre);
+            if (orden === "nombre_desc") return b.nombre.localeCompare(a.nombre);
             
-            lista.innerHTML = data.map(r => `
-                <tr>
-                    <td><div style="font-weight: 600; color: var(--primary);">${r.nombre}</div></td>
-                    <td>${r.email || '<span style="color:#cbd5e1">-</span>'}</td>
-                    <td>${r.telefono || '-'}</td>
-                    <td><div class="desc-cell">${r.descripcion || ''}</div></td>
-                    <td>
-                        <div style="display: flex; justify-content: center; gap: 5px;">
-                            <button class="btn-icon edit" onclick="prepararEdicion(${r.id})" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-icon delete" onclick="eliminarRegistro(${r.id})" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (error) {
-            mostrarAlerta("Error al cargar datos", "error");
-        }
+            const dA = new Date(a.fecha_nacimiento || '1900-01-01');
+            const dB = new Date(b.fecha_nacimiento || '1900-01-01');
+            return orden === "fecha_asc" ? dA - dB : dB - dA;
+        });
+
+        registrosFiltrados = resultado;
+        if(resetPagina) paginaActual = 1;
+        renderizarTabla();
     }
 
-    function prepararEdicion(id) {
-        const registro = registrosCache.find(r => r.id == id);
-        if(registro) {
-            idInput.value = registro.id;
-            document.getElementById("nombre").value = registro.nombre;
-            document.getElementById("email").value = registro.email || "";
-            document.getElementById("telefono").value = registro.telefono || "";
-            document.getElementById("descripcion").value = registro.descripcion || "";
-            document.getElementById("fecha_nacimiento").value = registro.fecha_nacimiento || "";
-            abrirModal(true);
-        }
+    function renderizarTabla() {
+        const inicio = (paginaActual - 1) * registrosPorPagina;
+        const items = registrosFiltrados.slice(inicio, inicio + registrosPorPagina);
+        const lista = document.getElementById("lista");
+
+        lista.innerHTML = items.map(r => `
+            <tr>
+                <td><b style="color:#6366f1">${r.nombre}</b></td>
+                <td>${r.email || '-'}</td>
+                <td>${r.telefono || '-'}</td>
+                <td><span class="date-badge">${r.fecha_nacimiento || 'N/A'}</span></td>
+                <td style="text-align:center">
+                    <button class="btn-icon edit" onclick="prepararEdicion(${r.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon delete" onclick="abrirModalConfirm(${r.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+        
+        renderizarPaginacion();
     }
 
-    form.onsubmit = async (e) => {
-        e.preventDefault();
-        const data = {
-            nombre: document.getElementById("nombre").value.trim(),
-            email: document.getElementById("email").value.trim() || null,
-            telefono: document.getElementById("telefono").value.trim() || null,
-            descripcion: document.getElementById("descripcion").value.trim(),
-            fecha_nacimiento: document.getElementById("fecha_nacimiento").value || null
-        };
+    function renderizarPaginacion() {
+        const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
+        const paginationDiv = document.getElementById("pagination");
+        if (totalPaginas <= 1) { paginationDiv.innerHTML = ""; return; }
 
-        const id = idInput.value;
-        const url = id ? `/api/editar/${id}/` : "/api/crear/";
-        const method = id ? "PUT" : "POST";
+        let html = `
+            <button class="page-btn" title="Primero" ${paginaActual === 1 ? 'disabled' : ''} onclick="cambiarPagina(1)">«</button>
+            <button class="page-btn" title="Anterior" ${paginaActual === 1 ? 'disabled' : ''} onclick="cambiarPagina(${paginaActual - 1})"><</button>
+        `;
 
-        try {
-            const res = await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-
-            const result = await res.json();
-            if(res.ok) {
-                mostrarAlerta(result.mensaje || "Éxito", "success");
-                cerrarModal();
-                cargarRegistros();
-            } else {
-                mostrarAlerta(result.error || "Error en el proceso", "error");
-            }
-        } catch (error) {
-            mostrarAlerta("Error de conexión", "error");
-        }
-    };
-
-    async function eliminarRegistro(id) {
-        if(confirm("¿Deseas eliminar este registro permanentemente?")) {
-            try {
-                const res = await fetch(`/api/eliminar/${id}/`, { method: "DELETE" });
-                if(res.ok) {
-                    mostrarAlerta("Registro eliminado", "success");
-                    cargarRegistros();
-                }
-            } catch (error) {
-                mostrarAlerta("No se pudo eliminar", "error");
+        for (let i = 1; i <= totalPaginas; i++) {
+            if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
+                html += `<button class="page-btn ${i === paginaActual ? 'active-page' : ''}" onclick="cambiarPagina(${i})">${i}</button>`;
+            } else if (i === paginaActual - 2 || i === paginaActual + 2) {
+                html += `<span style="padding: 0 5px;">...</span>`;
             }
         }
+
+        html += `
+            <button class="page-btn" title="Siguiente" ${paginaActual === totalPaginas ? 'disabled' : ''} onclick="cambiarPagina(${paginaActual + 1})">></button>
+            <button class="page-btn" title="Último" ${paginaActual === totalPaginas ? 'disabled' : ''} onclick="cambiarPagina(${totalPaginas})">»</button>
+        `;
+        paginationDiv.innerHTML = html;
     }
 
-    function mostrarAlerta(msg, tipo) {
-        const alertasDiv = document.getElementById("alertas");
-        const alerta = document.createElement("div");
-        alerta.className = `alert ${tipo}`;
-        alerta.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
-        alertasDiv.appendChild(alerta);
-        setTimeout(() => {
-            alerta.style.opacity = "0";
-            setTimeout(() => alerta.remove(), 500);
-        }, 3000);
+    function cambiarPagina(p) { paginaActual = p; renderizarTabla(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+
+    function limpiarFiltros() {
+        document.getElementById("busqueda").value = "";
+        document.getElementById("ordenarPor").value = "nombre_asc";
+        filtrarYOrdenar();
     }
 
+    // Inicializar
     cargarRegistros();
 </script>
-
 </body>
 </html>
