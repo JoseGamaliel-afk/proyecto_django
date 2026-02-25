@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'Paginas',
 ]
 
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
