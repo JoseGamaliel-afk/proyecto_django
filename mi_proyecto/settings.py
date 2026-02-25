@@ -83,9 +83,17 @@ TEMPLATES = [
 # DATABASE (PostgreSQL - Render)
 # ======================
 DATABASES = {
-    'default': dj_database_url.parse(
-        'postgresql://jose_afk:CcFCwT2EsG4ar60QIuJoWbeoz82nAa7u@dpg-d5r6bta4d50c738rqnj0-a.oregon-postgres.render.com/django_d7ft'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django_n4t3',
+        'USER': 'jose_afk',
+        'PASSWORD': 'X6HhebykXWGArDF5nyP31gzgoQSCJQxk',
+        'HOST': 'dpg-d6ffc214tr6s73bt51l0-a.oregon-postgres.render.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
 }
 
 
