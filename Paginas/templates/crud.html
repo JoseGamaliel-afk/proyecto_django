@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'styles/crud.css' %}">
     <style>
-        /* --- TUS ESTILOS EXISTENTES --- */
         .search-container { margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); align-items: center; }
         .search-input-wrapper { flex: 2; display: flex; align-items: center; position: relative; min-width: 250px; }
         .search-input { width: 100%; padding: 12px 18px 12px 40px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; transition: all 0.3s; font-size: 1rem; }
@@ -23,7 +22,6 @@
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .active-page { background: #6366f1 !important; color: white !important; border-color: #6366f1 !important; }
 
-        /* --- ESTILOS PARA MODALES (NUEVOS) --- */
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0; 
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); 
@@ -48,12 +46,10 @@
 </head>
 <body>
 
-<div id="alertas"></div>
-
 <header>
     <div class="header-content">
         <div class="header-text">
-            <h1><i class="fas fa-address-book"></i> Crud</h1>
+            <h1><i class="fas fa-address-book"></i> CRUD API</h1>
             <p>Búsqueda y administración en tiempo real</p>
         </div>
         <button class="btn btn-primary" onclick="abrirModal()">
@@ -65,7 +61,7 @@
 <main>
     <div class="page-container">
         <nav class="breadcrumbs">
-            <a href="{% url 'home' %}" style="color:#6366f1;text-decoration:none;">Home</a>
+            <a href="/" style="color:#6366f1;text-decoration:none;">Home</a>
             <span>›</span>
             <span>crud</span>
         </nav>
@@ -150,10 +146,15 @@
     let paginaActual = 1;
     const registrosPorPagina = 5; 
 
-    // --- FUNCIONES DE CARGA Y RENDERIZADO (TUS ORIGINALES) ---
+    // RUTAS CONFIGURADAS SEGÚN TU VIEWS.PY
+    const URL_API_LISTAR = "/api/registros/";
+    const URL_API_CREAR  = "/api/crear/";
+    const URL_API_EDITAR = "/api/editar/"; // Se le sumará el ID
+    const URL_API_ELIMINAR = "/api/eliminar/"; // Se le sumará el ID
+
     async function cargarRegistros() {
         try {
-            const res = await fetch("/api/registros/"); 
+            const res = await fetch(URL_API_LISTAR); 
             registrosCache = await res.json();
             filtrarYOrdenar(false); 
         } catch (e) { console.error("Error cargando datos"); }
@@ -198,8 +199,6 @@
         renderizarPaginacion();
     }
 
-    // --- LÓGICA DE MODALES Y CRUD (NUEVO) ---
-
     function abrirModal() {
         document.getElementById("modalTitle").innerText = "Nuevo Contacto";
         document.getElementById("registroForm").reset();
@@ -223,7 +222,6 @@
         document.getElementById("modalForm").style.display = "block";
     }
 
-    // Manejo del Submit (Guardar/Actualizar)
     document.getElementById("registroForm").onsubmit = async (e) => {
         e.preventDefault();
         const id = document.getElementById("registroId").value;
@@ -234,7 +232,7 @@
             fecha_nacimiento: document.getElementById("fecha_nacimiento").value,
         };
 
-        const url = id ? `/api/registros/${id}/` : "/api/registros/";
+        let url = id ? `${URL_API_EDITAR}${id}/` : URL_API_CREAR;
         const method = id ? "PUT" : "POST";
 
         try {
@@ -263,7 +261,7 @@
     document.getElementById("btnConfirmarEliminar").onclick = async () => {
         if(!idAEliminar) return;
         try {
-            const res = await fetch(`/api/registros/${idAEliminar}/`, {
+            const res = await fetch(`${URL_API_ELIMINAR}${idAEliminar}/`, {
                 method: "DELETE",
                 headers: { "X-CSRFToken": getCookie('csrftoken') }
             });
@@ -274,7 +272,6 @@
         } catch (error) { console.error("Error al eliminar"); }
     };
 
-    // Auxiliar para CSRF de Django
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -290,7 +287,6 @@
         return cookieValue;
     }
 
-    // (Tus otras funciones de paginación y limpiar filtros se mantienen igual...)
     function renderizarPaginacion() {
         const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
         const paginationDiv = document.getElementById("pagination");
