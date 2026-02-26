@@ -16,8 +16,10 @@
         .filter-select { flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: white; outline: none; cursor: pointer; min-width: 180px; }
         .btn-clear { padding: 12px 20px; background: #f1f5f9; border: none; border-radius: 10px; color: #475569; cursor: pointer; transition: 0.3s; font-weight: 500; }
         .btn-clear:hover { background: #e2e8f0; color: #1e293b; }
+        
+        /* Paginación mejorada */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 25px; padding: 20px 0; }
-        .page-btn { min-width: 38px; height: 38px; border: 1px solid #e2e8f0; background: white; color: #475569; cursor: pointer; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .page-btn { min-width: 38px; height: 38px; border: 1px solid #e2e8f0; background: white; color: #475569; cursor: pointer; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-weight: 600; padding: 0 10px; }
         .page-btn:hover:not(:disabled) { border-color: #6366f1; color: #6366f1; background: #f8fafc; }
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .active-page { background: #6366f1 !important; color: white !important; border-color: #6366f1 !important; }
@@ -146,11 +148,10 @@
     let paginaActual = 1;
     const registrosPorPagina = 5; 
 
-    // RUTAS CONFIGURADAS SEGÚN TU VIEWS.PY
     const URL_API_LISTAR = "/api/registros/";
     const URL_API_CREAR  = "/api/crear/";
-    const URL_API_EDITAR = "/api/editar/"; // Se le sumará el ID
-    const URL_API_ELIMINAR = "/api/eliminar/"; // Se le sumará el ID
+    const URL_API_EDITAR = "/api/editar/"; 
+    const URL_API_ELIMINAR = "/api/eliminar/";
 
     async function cargarRegistros() {
         try {
@@ -199,6 +200,50 @@
         renderizarPaginacion();
     }
 
+    // --- LOGICA DE PAGINACION ACTUALIZADA ---
+    function renderizarPaginacion() {
+        const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
+        const paginationDiv = document.getElementById("pagination");
+        
+        if (totalPaginas <= 1) { 
+            paginationDiv.innerHTML = ""; 
+            return; 
+        }
+
+        let html = "";
+        
+        // Ir al inicio <<
+        html += `<button class="page-btn" ${paginaActual === 1 ? 'disabled' : ''} onclick="cambiarPagina(1)" title="Primera página">«</button>`;
+        
+        // Anterior <
+        html += `<button class="page-btn" ${paginaActual === 1 ? 'disabled' : ''} onclick="cambiarPagina(${paginaActual - 1})" title="Anterior">‹</button>`;
+
+        // Números de página (Muestra la actual y un rango)
+        for (let i = 1; i <= totalPaginas; i++) {
+            // Solo mostrar páginas cercanas a la actual para no saturar si hay muchas
+            if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
+                html += `<button class="page-btn ${i === paginaActual ? 'active-page' : ''}" onclick="cambiarPagina(${i})">${i}</button>`;
+            } else if (i === paginaActual - 2 || i === paginaActual + 2) {
+                html += `<span style="padding: 0 5px;">...</span>`;
+            }
+        }
+
+        // Siguiente >
+        html += `<button class="page-btn" ${paginaActual === totalPaginas ? 'disabled' : ''} onclick="cambiarPagina(${paginaActual + 1})" title="Siguiente">›</button>`;
+        
+        // Ir al final >>
+        html += `<button class="page-btn" ${paginaActual === totalPaginas ? 'disabled' : ''} onclick="cambiarPagina(${totalPaginas})" title="Última página">»</button>`;
+
+        paginationDiv.innerHTML = html;
+    }
+
+    function cambiarPagina(p) { 
+        if(p < 1 || p > Math.ceil(registrosFiltrados.length / registrosPorPagina)) return;
+        paginaActual = p; 
+        renderizarTabla(); 
+    }
+
+    // Funciones de Modal y API
     function abrirModal() {
         document.getElementById("modalTitle").innerText = "Nuevo Contacto";
         document.getElementById("registroForm").reset();
@@ -206,9 +251,7 @@
         document.getElementById("modalForm").style.display = "block";
     }
 
-    function cerrarModal() {
-        document.getElementById("modalForm").style.display = "none";
-    }
+    function cerrarModal() { document.getElementById("modalForm").style.display = "none"; }
 
     function prepararEdicion(id) {
         const reg = registrosCache.find(r => r.id === id);
@@ -241,10 +284,7 @@
                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie('csrftoken') },
                 body: JSON.stringify(data)
             });
-            if(res.ok) {
-                cerrarModal();
-                cargarRegistros();
-            }
+            if(res.ok) { cerrarModal(); cargarRegistros(); }
         } catch (error) { console.error("Error al guardar"); }
     };
 
@@ -254,9 +294,7 @@
         document.getElementById("modalConfirm").style.display = "block";
     }
 
-    function cerrarModalConfirm() {
-        document.getElementById("modalConfirm").style.display = "none";
-    }
+    function cerrarModalConfirm() { document.getElementById("modalConfirm").style.display = "none"; }
 
     document.getElementById("btnConfirmarEliminar").onclick = async () => {
         if(!idAEliminar) return;
@@ -265,10 +303,7 @@
                 method: "DELETE",
                 headers: { "X-CSRFToken": getCookie('csrftoken') }
             });
-            if(res.ok) {
-                cerrarModalConfirm();
-                cargarRegistros();
-            }
+            if(res.ok) { cerrarModalConfirm(); cargarRegistros(); }
         } catch (error) { console.error("Error al eliminar"); }
     };
 
@@ -287,21 +322,11 @@
         return cookieValue;
     }
 
-    function renderizarPaginacion() {
-        const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
-        const paginationDiv = document.getElementById("pagination");
-        if (totalPaginas <= 1) { paginationDiv.innerHTML = ""; return; }
-        let html = `<button class="page-btn" ${paginaActual === 1 ? 'disabled' : ''} onclick="cambiarPagina(1)">«</button>`;
-        for (let i = 1; i <= totalPaginas; i++) {
-            if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
-                html += `<button class="page-btn ${i === paginaActual ? 'active-page' : ''}" onclick="cambiarPagina(${i})">${i}</button>`;
-            }
-        }
-        html += `<button class="page-btn" ${paginaActual === totalPaginas ? 'disabled' : ''} onclick="cambiarPagina(${totalPaginas})">»</button>`;
-        paginationDiv.innerHTML = html;
+    function limpiarFiltros() { 
+        document.getElementById("busqueda").value = ""; 
+        document.getElementById("ordenarPor").value = "nombre_asc"; 
+        filtrarYOrdenar(); 
     }
-    function cambiarPagina(p) { paginaActual = p; renderizarTabla(); }
-    function limpiarFiltros() { document.getElementById("busqueda").value = ""; document.getElementById("ordenarPor").value = "nombre_asc"; filtrarYOrdenar(); }
 
     cargarRegistros();
 </script>
